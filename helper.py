@@ -76,6 +76,10 @@ def slice_spect(input_file):
   img = Image.open(input_file)
   dims = get_slice_dims(img)
   counter = 0
+
+  if not os.path.exists(DATA_DIR):
+      os.makedirs(DATA_DIR)
+
   for dim in dims:
     counter_formatted = str(counter).zfill(3)
     img_name = '{}__{}.png'.format(input_file_cleaned, counter_formatted)

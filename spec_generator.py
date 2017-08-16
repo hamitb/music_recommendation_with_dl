@@ -44,6 +44,9 @@ def create_file_names(id):
     track_name_raw = track_name_raw.replace('(', '-')
     track_name_raw = track_name_raw.replace(')', '-')
     track_name_raw = track_name_raw.replace('&', 'n')
+    track_name_raw = track_name_raw.replace("'", '')
+    track_name_raw = track_name_raw.replace(u'\xa0',u' ')
+    track_name_raw = track_name_raw.replace(u'\xe4',u' ')
     track_name = '{}__{}.mp3'.format(genre_name, track_name_raw)
     spect_name = track_name.replace('.mp3','')
     spect_name = '{}.png'.format(spect_name)
@@ -51,7 +54,8 @@ def create_file_names(id):
 
 
 url_list = list(df['link'])
-for track_id in range(0, 3):
+for track_id in range(1157, len(df)):
+  print ("Current track: {}".format(track_id))
   url = url_list[track_id]
   track_name, spect_name, genre_name = create_file_names(track_id)
   print('Track: {}, Spect: {}, Genre: {}'
@@ -63,5 +67,6 @@ for track_id in range(0, 3):
     audio_to_spect(track_name, spect_name)
     slice_spect(spect_name)
 
-  except KeyboardInterrupt:
-        sys.exit()
+  except:
+    print ("Error on track: {}".format(track_id))
+    continue
