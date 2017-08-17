@@ -9,17 +9,13 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Input, Dense
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, LabelBinarizer
-import matplotlib as plt
-import os
 import numpy as np
-import pandas as pd
-import numpy as np
-import pickle
 import glob
 
 num_classes = 7
 image_size = 256
 nb_epoch = 20
+batch_size = 128
 
 
 image_dir= 'images/'
@@ -34,7 +30,7 @@ def scale_features(img):
 spect_files = glob.glob(image_dir + '*.png')
 for file in spect_files:
   img = load_img('{}'.format(file), target_size=(256, 256))
-  track_name = file.split('/')[2]
+  track_name = file.split('/')[1]
   genre = track_name.split('__')[0]
   img_array = img_to_array(img)
   img_array = scale_features(img_array)
@@ -48,6 +44,11 @@ transformed_genres = encoder.fit_transform(genres)
 # Split test and train sets
 features_train, features_test, labels_train, labels_test = train_test_split(images, transformed_genres, test_size=0.3, random_state=42)
 features_train, features_test = np.array(features_train), np.array(features_test)
+
+# Callbacks
+early_stopping = EarlyStopping(monitor='val_loss', patience=3)
+save_best_model = ModelCheckpoint(filepath='model_.{epoch:02d}_{val_loss:.2f}.hdf5', verbose=1,
+        monitor='val_loss')
 
 # Create model
 model = Sequential()
@@ -81,7 +82,10 @@ model.compile(loss='categorical_crossentropy',
 
 
 # Fit
-history = model.fit(features_train, labels_train, epochs=20, validation_data=(features_test, labels_test))
+history = model.fit(features_train, labels_train, 
+                    epochs=20, validation_data=(features_test, labels_test),
+                    callbacks=[early_stopping, save_best_model],
+                    batch_size = batch_size)
 
 # Save
 model.save('model.h5')
